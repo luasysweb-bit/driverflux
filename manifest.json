@@ -1,0 +1,16 @@
+{
+  "name": "DriverFlux Pro",
+  "short_name": "DriverFlux",
+  "description": "Gestão Inteligente para Motoristas de Aplicativo",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3204/3204003.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
