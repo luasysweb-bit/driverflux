@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DriverFlux Pro - Edição Definitiva</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3204/3204003.png">
+    <style>
+        :root {
+            --primary: #2563eb; --primary-dark: #1e40af; --success: #059669; --danger: #dc2626;
+            --warning: #ca8a04; --bg: #f8fafc; --surface: #ffffff; --text: #1e293b; --text-muted: #64748b;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0 0 75px 0; color: var(--text); -webkit-font-smoothing: antialiased; }
+        
+        /* Layout e Abas */
+        .page { display: none; padding: 15px; max-width: 600px; margin: auto; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Cartões */
+        .card { background: var(--surface); padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #f1f5f9; }
+        h2, h3 { margin-top: 0; color: var(--primary-dark); font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
+        
+        /* Alertas */
+        .alert { padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 0.85rem; font-weight: 600; display: none; align-items: center; gap: 10px; }
+        .alert-warning { background: #fef08a; color: #854d0e; border: 1px solid #eab308; }
+        .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; }
+
+        /* Formulários */
+        label { display: block; margin: 12px 0 4px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 15px; transition: 0.2s; background: #fdfdfd; }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        /* Botões */
+        button { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        
+        /* Barras de Progresso */
+        .prog-row { margin-bottom: 12px; }
+        .prog-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; }
+        .prog-track { height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; }
+        .prog-fill { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
+        
+        /* Tabela */
+        .table-wrap { overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid #f1f5f9; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7rem; min-width: 550px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+        th { background: #f8fafc; color: var(--text-muted); font-weight: 600; }
+        .badge { padding: 4px 6px; border-radius: 6px; font-weight: bold; color: white; display: inline-block; }
+        .app-tag { font-size: 0.65rem; background: #e2e8f0; color: #333; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
+        
+        /* Navegação Inferior */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: env(safe-area-inset-bottom, 10px); z-index: 1000; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; width: 33%; cursor: pointer; transition: color 0.2s; }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <section id="tab-painel" class="page active">
+        
+        <div id="alertaOleo" class="alert"></div>
+
+        <div class="card">
+            <h2>📊 Resumo Executivo</h2>
+            <div class="prog-row">
+                <div class="prog-header"><span>Meta Base Mínima</span><span id="pMin">0%</span></div>
+                <div class="prog-track"><div id="bMin" class="prog-fill" style="background:#3b82f6; width:0%"></div></div>
+            </div>
+            
+            <div class="grid-2" style="margin-top: 15px; text-align: center;">
+                <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <span style="font-size:0.7rem; color:var(--text-muted); display:block; font-weight:bold;">LUCRO TOTAL</span>
+                    <strong style="color:var(--primary-dark); font-size:1.15rem;" id="lucroTotalMes">R$ 0,00</strong>
+                </div>
+                <div style="background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <span style="font-size:0.7rem; color:var(--text-muted); display:block; font-weight:bold;">MÉDIA R$/HORA</span>
+                    <strong style="color:var(--success); font-size:1.15rem;" id="mediaHoraMes">R$ 0,00</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📝 Novo Turno</h2>
+            <div class="grid-2">
+                <div>
+                    <label>Aplicativo</label>
+                    <select id="appUsado">
+                        <option value="Uber">Uber</option>
+                        <option value="99">99</option>
+                        <option value="inDrive">inDrive</option>
+                        <option value="Particular">Particular</option>
+                        <option value="Misto">Misto</option>
+                    </select>
+                </div>
+                <div><label>Horas (Ex: 8.5)</label><input type="number" id="hTrab" step="0.5"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Km Inicial</label><input type="number" id="kI"></div>
+                <div><label>Km Final</label><input type="number" id="kF"></div>
+            </div>
+            <div class="grid-2">
+                <div><label>Ganho Bruto (R$)</label><input type="number" id="gB"></div>
+                <div><label>Gasto Extra (R$)</label><input type="number" id="gE" value="0"></div>
+            </div>
+            <button class="btn-success" onclick="salvarDiario()">💾 Guardar Turno</button>
+        </div>
+
+        <div class="card">
+            <h3>📜 Histórico Analítico</h3>
+            <div class="table-wrap">
+                <table id="tabelaHistorico">
+                    <thead>
+                        <tr><th>Data</th><th>App / Horas</th><th>Lucro</th><th>R$/Km</th><th>R$/Hora</th><th></th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="tab-simulador" class="page">
+        <div class="card" style="border: 2px solid var(--primary);">
+            <h2>🧮 Simulador Particular</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top:-5px;">Descubra o preço ideal para não ter prejuízo.</p>
+            
+            <label>Distância Total (Ida + Volta em km)</label>
+            <input type="number" id="simDist" placeholder="Ex: 40">
+            
+            <div class="grid-2">
+                <div><label>Preço Combustível</label><input type="number" id="simPrec" value="5.80"></div>
+                <div><label>Consumo (km/l)</label><input type="number" id="simCons" value="10"></div>
+            </div>
+            
+            <label>O cliente ofereceu um valor? (Opcional)</label>
+            <input type="number" id="simOferta" placeholder="R$ 0,00">
+            
+            <button class="btn-primary" onclick="calcularOrcamento()">📊 Calcular Viagem</button>
+        </div>
+
+        <div id="resultadoSimulacao" class="card" style="display:none; background: #f0f9ff; border-color: #bae6fd;">
+            <div id="conteudoSimulacao"></div>
+        </div>
+    </section>
+
+    <section id="tab-config" class="page">
+        <div class="card">
+            <h2>🎯 Metas e Eficiência</h2>
+            <label>Meta Mensal (Mínima de Sobrevivência)</label>
+            <input type="number" id="cfgMin" value="3000">
+            
+            <div class="grid-2" style="margin-top: 10px;">
+                <div><label>R$/Km (Mínimo)</label><input type="number" id="cfgKmMin" value="1.80" step="0.10"></div>
+                <div><label>R$/Km (Ideal)</label><input type="number" id="cfgKmMax" value="2.50" step="0.10"></div>
+            </div>
+            
+            <hr style="border:0; border-top:1px solid #e2e8f0; margin:20px 0;">
+            
+            <h2>🔧 Manutenção Preventiva</h2>
+            <div class="grid-2">
+                <div><label>Km da Última Troca de Óleo</label><input type="number" id="cfgOleoUltimo" placeholder="Ex: 105000"></div>
+                <div><label>Trocar a cada (Km)</label><input type="number" id="cfgOleoIntervalo" value="10000"></div>
+            </div>
+
+            <button class="btn-primary" onclick="salvarConfig()">✅ Guardar Tudo</button>
+        </div>
+        
+        <div style="text-align:center; margin-top:20px;">
+            <button onclick="limparTudo()" style="background:none; color:var(--danger); font-size:0.8rem; width:auto; margin:auto;">⚠️ Apagar todos os dados do App</button>
+        </div>
+    </section>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('tab-painel', this)">
+            <span class="nav-icon">📊</span><span>Painel</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-simulador', this)">
+            <span class="nav-icon">🧮</span><span>Simulador</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-config', this)">
+            <span class="nav-icon">⚙️</span><span>Ajustes</span>
+        </div>
+    </nav>
+
+    <script>
+        const MANUT_KM = 0.15; // Custo fixo embutido (Pneus, Freios, etc)
+        const formatBRL = (valor) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+
+        // --- SISTEMA DE NAVEGAÇÃO ---
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+            if(tabId === 'tab-painel') renderizarPainel();
+            if(tabId === 'tab-config') carregarConfigInputs();
+        }
+
+        // --- GESTÃO DE CONFIGURAÇÕES ---
+        function getConfig() {
+            return JSON.parse(localStorage.getItem('df12_cfg')) || { 
+                min: 3000, kmMin: 1.8, kmMax: 2.5, oleoUltimo: 0, oleoIntervalo: 10000 
+            };
+        }
+
+        function salvarConfig() {
+            const cfg = {
+                min: parseFloat(document.getElementById('cfgMin').value) || 1,
+                kmMin: parseFloat(document.getElementById('cfgKmMin').value) || 1.8,
+                kmMax: parseFloat(document.getElementById('cfgKmMax').value) || 2.5,
+                oleoUltimo: parseFloat(document.getElementById('cfgOleoUltimo').value) || 0,
+                oleoIntervalo: parseFloat(document.getElementById('cfgOleoIntervalo').value) || 10000
+            };
+            localStorage.setItem('df12_cfg', JSON.stringify(cfg));
+            alert("Configurações Guardadas!");
+            renderizarPainel();
+        }
+
+        function carregarConfigInputs() {
+            const c = getConfig();
+            document.getElementById('cfgMin').value = c.min;
+            document.getElementById('cfgKmMin').value = c.kmMin;
+            document.getElementById('cfgKmMax').value = c.kmMax;
+            if(c.oleoUltimo > 0) document.getElementById('cfgOleoUltimo').value = c.oleoUltimo;
+            document.getElementById('cfgOleoIntervalo').value = c.oleoIntervalo;
+        }
+
+        // --- SIMULADOR DE ORÇAMENTO ---
+        function calcularOrcamento() {
+            const d = parseFloat(document.getElementById('simDist').value);
+            const p = parseFloat(document.getElementById('simPrec').value);
+            const c = parseFloat(document.getElementById('simCons').value);
+            const oferta = parseFloat(document.getElementById('simOferta').value) || 0;
+            const cfg = getConfig();
+
+            if(!d || !p || !c) return alert("Preencha distância, preço do combustível e consumo.");
+
+            const custoTotal = (d / c * p) + (d * MANUT_KM);
+            const precoSugeridoMin = custoTotal + (d * cfg.kmMin);
+            const precoSugeridoIdeal = custoTotal + (d * cfg.kmMax);
+
+            const div = document.getElementById('resultadoSimulacao');
+            div.style.display = 'block';
+
+            let html = `<h3 style="margin-bottom:10px; color:var(--primary-dark);">📋 Orçamento Recomendado</h3>`;
+            html += `<div style="font-size:0.9rem; margin-bottom:15px; line-height:1.6;">
+                        <div>🚀 Ideal (Meta Alta): <strong>${formatBRL(precoSugeridoIdeal)}</strong></div>
+                        <div>✅ Mínimo Aceitável: <strong>${formatBRL(precoSugeridoMin)}</strong></div>
+                        <div style="color:var(--danger); margin-top:5px; font-size:0.8rem; font-weight:bold;">Custo Fixo (Gasolina+Desgaste): ${formatBRL(custoTotal)}</div>
+                     </div>`;
+
+            if(oferta > 0) {
+                const lucro = oferta - custoTotal;
+                const rkm = lucro / d;
+                let status = rkm >= cfg.kmMax ? "<span style='color:var(--success); font-weight:bold;'>EXCELENTE 🟢</span>" :
+                             rkm >= cfg.kmMin ? "<span style='color:var(--warning); font-weight:bold;'>RAZOÁVEL 🟡</span>" :
+                             "<span style='color:var(--danger); font-weight:bold;'>PREJUÍZO 🔴</span>";
+                
+                html += `<hr style="border:0; border-top:1px solid #bae6fd; margin:15px 0;">`;
+                html += `<strong>Análise da Proposta (${formatBRL(oferta)}):</strong><br>`;
+                html += `Veredito: ${status}<br>`;
+                html += `<small style="display:block; margin-top:5px; color:var(--text-muted);">Lucro Real: ${formatBRL(lucro)} | R$ ${rkm.toFixed(2)}/km</small>`;
+            }
+            document.getElementById('conteudoSimulacao').innerHTML = html;
+        }
+
+        // --- REGISTRO E PAINEL ---
+        function salvarDiario() {
+            const app = document.getElementById('appUsado').value;
+            const horas = parseFloat(document.getElementById('hTrab').value);
+            const ki = parseFloat(document.getElementById('kI').value);
+            const kf = parseFloat(document.getElementById('kF').value);
+            const gb = parseFloat(document.getElementById('gB').value);
+            const ge = parseFloat(document.getElementById('gE').value) || 0;
+
+            if(!horas || isNaN(ki) || isNaN(kf) || isNaN(gb)) return alert("Preencha Horas, Kms e Ganhos!");
+            if(kf <= ki) return alert("O Km Final deve ser maior que o Inicial!");
+
+            const dist = kf - ki;
+            const lucro = gb - (ge + (dist * MANUT_KM));
+            const rkm = lucro / dist;
+            const rph = lucro / horas;
+            const dataObj = new Date();
+            const dataStr = `${dataObj.getDate().toString().padStart(2,'0')}/${(dataObj.getMonth()+1).toString().padStart(2,'0')}`;
+
+            let h = JSON.parse(localStorage.getItem('df12_dados')) || [];
+            h.push({ data: dataStr, app, horas, dist, kf, lucro, rkm, rph });
+            localStorage.setItem('df12_dados', JSON.stringify(h));
+            
+            // Facilita o próximo turno
+            document.getElementById('kI').value = kf; 
+            document.getElementById('kF').value = '';
+            document.getElementById('gB').value = '';
+            document.getElementById('gE').value = '0';
+            document.getElementById('hTrab').value = '';
+            
+            renderizarPainel();
+            alert("Turno registado com sucesso!");
+        }
+
+        function verificarOleo(ultimoKmRegistado, cfg) {
+            const alerta = document.getElementById('alertaOleo');
+            if (cfg.oleoUltimo === 0) {
+                alerta.style.display = 'none';
+                return;
+            }
+
+            const kmProximaTroca = cfg.oleoUltimo + cfg.oleoIntervalo;
+            const kmRestante = kmProximaTroca - ultimoKmRegistado;
+
+            if (kmRestante <= 0) {
+                alerta.className = 'alert alert-danger';
+                alerta.innerHTML = `🚨 <strong>ATENÇÃO:</strong> Passou da hora de trocar o óleo! (Atrasado ${Math.abs(kmRestante)} km)`;
+                alerta.style.display = 'flex';
+            } else if (kmRestante <= 1000) {
+                alerta.className = 'alert alert-warning';
+                alerta.innerHTML = `⚠️ <strong>Aviso:</strong> Faltam apenas ${kmRestante} km para a próxima troca de óleo.`;
+                alerta.style.display = 'flex';
+            } else {
+                alerta.style.display = 'none';
+            }
+        }
+
+        function renderizarPainel() {
+            const h = JSON.parse(localStorage.getItem('df12_dados')) || [];
+            const cfg = getConfig();
+            const tbody = document.querySelector('#tabelaHistorico tbody');
+            tbody.innerHTML = '';
+            
+            let somaLucro = 0; let somaHoras = 0;
+            let ultimoKm = 0;
+
+            h.slice().reverse().forEach((r, i) => {
+                somaLucro += r.lucro;
+                somaHoras += r.horas;
+                if(i === 0) ultimoKm = r.kf; // O item mais recente (por causa do reverse, i=0 é o último adicionado)
+                
+                const idx = h.length - 1 - i;
+                
+                // Cores de Saúde
+                let corHora = r.rph >= 30 ? 'var(--success)' : (r.rph >= 15 ? 'var(--warning)' : 'var(--danger)');
+                let corKm = r.rkm >= cfg.kmMax ? 'var(--success)' : (r.rkm >= cfg.kmMin ? 'var(--warning)' : 'var(--danger)');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${r.data}</td>
+                        <td><span class="app-tag">${r.app}</span><br>${r.horas}h</td>
+                        <td style="font-weight:bold">${formatBRL(r.lucro)}</td>
+                        <td><span class="badge" style="background:${corKm}">${r.rkm.toFixed(2)}</span></td>
+                        <td><span class="badge" style="background:${corHora}">${formatBRL(r.rph)}</span></td>
+                        <td style="text-align:center;"><button onclick="apagarLinha(${idx})" style="background:none; border:none; font-size:1rem; padding:0; cursor:pointer;">🗑️</button></td>
+                    </tr>`;
+            });
+
+            // Atualizar Totais e Progresso
+            document.getElementById('lucroTotalMes').innerText = formatBRL(somaLucro);
+            const mediaHora = somaHoras > 0 ? somaLucro / somaHoras : 0;
+            document.getElementById('mediaHoraMes').innerText = formatBRL(mediaHora) + '/h';
+            
+            const perc = Math.min(100, (somaLucro / cfg.min * 100));
+            document.getElementById('bMin').style.width = perc + '%';
+            document.getElementById('pMin').innerText = perc.toFixed(0) + '%';
+
+            // Chamar verificação de Óleo
+            if (h.length > 0) verificarOleo(ultimoKm, cfg);
+        }
+
+        function apagarLinha(idx) {
+            if(confirm("Apagar este registro permanentemente?")) {
+                let h = JSON.parse(localStorage.getItem('df12_dados'));
+                h.splice(idx, 1);
+                localStorage.setItem('df12_dados', JSON.stringify(h));
+                renderizarPainel();
+            }
+        }
+
+        function limparTudo() {
+            if(confirm("ATENÇÃO: Isto apagará TODO o seu histórico e configurações. Continuar?")) {
+                localStorage.clear();
+                carregarConfigInputs();
+                renderizarPainel();
+                document.getElementById('alertaOleo').style.display = 'none';
+                switchTab('tab-painel', document.querySelector('.nav-item'));
+            }
+        }
+
+        // Arranque
+        window.onload = () => {
+            carregarConfigInputs();
+            renderizarPainel();
+        };
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('App pronto para instalar!'))
+                    .catch(error => console.log('Erro ao registar o App:', error));
+            });
+        }
+    </script>
+</body>
+</html>
